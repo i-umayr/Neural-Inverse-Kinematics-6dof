@@ -81,17 +81,17 @@ matplotlib>=3.4.0
 ```
 
 
-Model Files
+## Model Files
 
-advanced_kinematics_model.keras: Trained model
-standard_scaler.save: Input feature scaler
-minmax_scaler.save: Output normalizer
+- advanced_kinematics_model.keras: Trained model
+- standard_scaler.save: Input feature scaler
+- minmax_scaler.save: Output normalizer
 
-Future Work
+## Future Work
 
-Implementation of uncertainty estimation
-Integration with real-time robot control systems
-Extension to different robot configurations
-Multi-task learning for additional end-effector constraints
+- Implementation of uncertainty estimation
+- Integration with real-time robot control systems
+- Extension to different robot configurations
+- Multi-task learning for additional end-effector constraints
 
 
