@@ -7,7 +7,7 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.layers import (
     Dense, LSTM, Dropout, BatchNormalization, Input, 
     LeakyReLU, Add, Concatenate, LayerNormalization,
-    GaussianNoise, Reshape, TimeDistributed, Attention
+    GaussianNoise, Layer
 )
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import (
@@ -20,8 +20,8 @@ from datetime import datetime
 
 # Configuration
 class Config:
-    BATCH_SIZE = 32  # Increased for faster training
-    EPOCHS = 100     # Reduced for initial testing
+    BATCH_SIZE = 32
+    EPOCHS = 100
     LEARNING_RATE = 1e-4
     LSTM_UNITS = 256
     DENSE_UNITS = [512, 256, 128]
@@ -33,6 +33,18 @@ class Config:
     LR_REDUCTION_PATIENCE = 8
     LR_REDUCTION_FACTOR = 0.5
     MIN_LR = 1e-7
+    SEQUENCE_LENGTH = 4
+
+# Custom sequence generation layer
+class SequenceGenerationLayer(Layer):
+    def __init__(self, sequence_length, **kwargs):
+        super().__init__(**kwargs)
+        self.sequence_length = sequence_length
+
+    def call(self, inputs):
+        # Expand dimensions and repeat
+        expanded = tf.expand_dims(inputs, axis=1)
+        return tf.repeat(expanded, repeats=self.sequence_length, axis=1)
 
 # Custom loss function
 def joint_angle_loss(y_true, y_pred):
@@ -46,7 +58,7 @@ def joint_angle_loss(y_true, y_pred):
     
     return 0.7 * mse + 0.3 * periodic_loss
 
-# Residual block with advanced features
+# Residual block
 def residual_block(x, units, dropout_rate=0.1):
     shortcut = x
     
@@ -77,11 +89,9 @@ def build_advanced_model(input_dim, output_dim):
     x = LeakyReLU(negative_slope=0.1)(x)
     x = Dropout(Config.DROPOUT_RATE)(x)
     
-    # LSTM stream
-    x_lstm = Reshape((1, -1))(x)  # Reshape for LSTM
-    x_lstm = LSTM(Config.LSTM_UNITS, return_sequences=True)(x_lstm)
-    x_lstm = Attention()([x_lstm, x_lstm])  # Self-attention
-    x_lstm = Reshape((-1,))(x_lstm)  # Flatten
+    # LSTM stream with custom sequence generation
+    x_lstm = SequenceGenerationLayer(Config.SEQUENCE_LENGTH)(x)
+    x_lstm = LSTM(Config.LSTM_UNITS)(x_lstm)
     
     # Residual stream
     x_res = x
@@ -127,6 +137,7 @@ y_test_scaled = minmax_scaler.transform(y_test)
 # Build and compile model
 print("Building model...")
 model = build_advanced_model(X_train.shape[1], y_train.shape[1])
+model.summary()
 
 # Learning rate schedule
 initial_learning_rate = Config.LEARNING_RATE
@@ -160,7 +171,7 @@ callbacks = [
         verbose=1
     ),
     ModelCheckpoint(
-        'best_modelLSTM.keras',
+        'best_model.keras',
         monitor='val_loss',
         save_best_only=True,
         verbose=1
@@ -233,5 +244,6 @@ for i in range(6):
 # Save model and scalers
 print("\nSaving model and scalers...")
 model.save('advanced_kinematics_model.keras')
+import joblib
 joblib.dump(standard_scaler, 'standard_scaler.save')
 joblib.dump(minmax_scaler, 'minmax_scaler.save')
