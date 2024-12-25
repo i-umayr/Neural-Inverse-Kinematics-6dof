@@ -78,3 +78,18 @@ numpy>=1.21.0
 pandas>=1.3.0
 scikit-learn>=0.24.0
 matplotlib>=3.4.0
+
+Model Files
+
+advanced_kinematics_model.keras: Trained model
+standard_scaler.save: Input feature scaler
+minmax_scaler.save: Output normalizer
+
+Future Work
+
+Implementation of uncertainty estimation
+Integration with real-time robot control systems
+Extension to different robot configurations
+Multi-task learning for additional end-effector constraints
+
+
