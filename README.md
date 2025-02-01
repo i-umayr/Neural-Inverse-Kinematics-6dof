@@ -42,6 +42,9 @@ Our implementation addresses these challenges using a deep learning approach tha
 - Early stopping with patience: 20
 - Loss function: 0.7×MSE + 0.3×Periodic Loss
 
+![image](https://github.com/user-attachments/assets/b5bd6414-d2d7-4842-9d9d-a809f14a2536)
+
+
 ## Performance Results
 
 ### Accuracy Metrics
